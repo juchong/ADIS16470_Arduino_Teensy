@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  February 2017
+//  November 2017
 //  Author: Juan Jose Chong <juan.chong@analog.com>
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  ADIS16470_Teensy_BurstRead_Example.ino
@@ -49,7 +49,7 @@
 
 // Initialize Variables
 // Temporary Data Array
-int16_t *burstData;
+uint16_t *burstData;
 
 // Checksum variable
 int16_t burstChecksum = 0;
@@ -96,7 +96,7 @@ void grabData()
 {
     burstData = {};
     IMU.configSPI(); // Configure SPI before the read. Useful when talking to multiple SPI devices
-    burstData = IMU.burstRead(); // Read data and insert into array
+    burstData = IMU.wordBurst(); // Read data and insert into array
 }
 
 // Function used to scale all acquired data (scaling functions are included in ADIS16470.cpp)
@@ -129,7 +129,7 @@ void loop()
         // Print header
         Serial.println(" ");
         Serial.println("ADIS16470 Teensy Burst Read Example Program");
-        Serial.println("Juan Chong - February 2017");
+        Serial.println("Juan Chong - November 2017");
         Serial.println(" ");
 
         // Print control registers to the serial port

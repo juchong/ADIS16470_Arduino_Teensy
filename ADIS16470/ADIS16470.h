@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  February 2017
+//  November 2017
 //  Author: Juan Jose Chong <juan.chong@analog.com>
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  ADIS16470.h
@@ -118,11 +118,14 @@ public:
   // Write register
   int regWrite(uint8_t regAddr, int16_t regData);
 
-  // Read sensor data using a burst read
-  int16_t *burstRead(void);
+  // Read sensor data using a burst read. Returns bits
+  uint8_t *byteBurst(void);
+
+  // Read sensor data using a burst read. Returns bytes
+  uint16_t *wordBurst(void);
 
   // Calculate checksum
-  int16_t checksum(int16_t * burstArray);
+  int16_t checksum(uint16_t * burstArray);
 
   // Scale accelerator data
   float accelScale(int16_t sensorData);

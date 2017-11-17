@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  February 2017
+//  November 2017
 //  Author: Juan Jose Chong <juan.chong@analog.com>
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  ADIS16470.cpp
@@ -163,13 +163,15 @@ int ADIS16470::regWrite(uint8_t regAddr, int16_t regData) {
 ////////////////////////////////////////////////////////////////////////////
 // No inputs required.
 ////////////////////////////////////////////////////////////////////////////
-int16_t *ADIS16470::burstRead(void) {
-	uint8_t burstdata[20];
-	static int16_t burstwords[10];
+uint8_t *ADIS16470::byteBurst(void) {
+
+	static uint8_t burstdata[20];
+
 	// Trigger Burst Read
 	digitalWrite(_CS, LOW);
 	SPI.transfer(0x68);
 	SPI.transfer(0x00);
+
 	// Read Burst Data
 	burstdata[0] = SPI.transfer(0x00); //DIAG_STAT
 	burstdata[1] = SPI.transfer(0x00);
@@ -193,17 +195,38 @@ int16_t *ADIS16470::burstRead(void) {
 	burstdata[19] = SPI.transfer(0x00);
 	digitalWrite(_CS, HIGH);
 
-	// Join bytes into words
-	burstwords[0] = ((burstdata[0] << 8) | (burstdata[1] & 0xFF)); //DIAG_STAT
-	burstwords[1] = ((burstdata[2] << 8) | (burstdata[3] & 0xFF)); //XGYRO
-	burstwords[2] = ((burstdata[4] << 8) | (burstdata[5] & 0xFF)); //YGYRO
-	burstwords[3] = ((burstdata[6] << 8) | (burstdata[7] & 0xFF)); //ZGYRO
-	burstwords[4] = ((burstdata[8] << 8) | (burstdata[9] & 0xFF)); //XACCEL
-	burstwords[5] = ((burstdata[10] << 8) | (burstdata[11] & 0xFF)); //YACCEL
-	burstwords[6] = ((burstdata[12] << 8) | (burstdata[13] & 0xFF)); //ZACCEL
-	burstwords[7] = ((burstdata[14] << 8) | (burstdata[15] & 0xFF)); //TEMP_OUT
-	burstwords[8] = ((burstdata[16] << 8) | (burstdata[17] & 0xFF)); //TIME_STMP
-	burstwords[9] = ((burstdata[18] << 8) | (burstdata[19] & 0xFF)); //CHECKSUM
+  return burstdata;
+
+}
+
+////////////////////////////////////////////////////////////////////////////
+// Intiates a burst read from the sensor.
+// Returns a pointer to an array of sensor data. 
+////////////////////////////////////////////////////////////////////////////
+// No inputs required.
+////////////////////////////////////////////////////////////////////////////
+uint16_t *ADIS16470::wordBurst(void) {
+
+  static uint16_t burstwords[10];
+
+  // Trigger Burst Read
+  digitalWrite(_CS, LOW);
+  SPI.transfer(0x68);
+  SPI.transfer(0x00);
+
+  // Read Burst Data
+  burstwords[0] = ((SPI.transfer(0x00) << 8) | (SPI.transfer(0x00) & 0xFF)); //DIAG_STAT
+  burstwords[1] = ((SPI.transfer(0x00) << 8) | (SPI.transfer(0x00) & 0xFF)); //XGYRO
+  burstwords[2] = ((SPI.transfer(0x00) << 8) | (SPI.transfer(0x00) & 0xFF)); //YGYRO
+  burstwords[3] = ((SPI.transfer(0x00) << 8) | (SPI.transfer(0x00) & 0xFF)); //ZGYRO
+  burstwords[4] = ((SPI.transfer(0x00) << 8) | (SPI.transfer(0x00) & 0xFF)); //XACCEL
+  burstwords[5] = ((SPI.transfer(0x00) << 8) | (SPI.transfer(0x00) & 0xFF)); //YACCEL
+  burstwords[6] = ((SPI.transfer(0x00) << 8) | (SPI.transfer(0x00) & 0xFF)); //ZACCEL
+  burstwords[7] = ((SPI.transfer(0x00) << 8) | (SPI.transfer(0x00) & 0xFF)); //TEMP_OUT
+  burstwords[8] = ((SPI.transfer(0x00) << 8) | (SPI.transfer(0x00) & 0xFF)); //TIME_STMP
+  burstwords[9] = ((SPI.transfer(0x00) << 8) | (SPI.transfer(0x00) & 0xFF)); //CHECKSUM
+
+  digitalWrite(_CS, HIGH);
 
   return burstwords;
 
@@ -216,7 +239,7 @@ int16_t *ADIS16470::burstRead(void) {
 // *burstArray - array of burst data
 // return - (int16_t) signed calculated checksum
 ////////////////////////////////////////////////////////////////////////////
-int16_t ADIS16470::checksum(int16_t * burstArray) {
+int16_t ADIS16470::checksum(uint16_t * burstArray) {
 	int16_t s = 0;
 	for (int i = 0; i < 9; i++) // Checksum value is not part of the sum!!
 	{
