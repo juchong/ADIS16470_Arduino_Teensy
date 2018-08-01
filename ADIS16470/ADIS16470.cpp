@@ -130,7 +130,7 @@ int ADIS16470::regWrite(uint8_t regAddr, int16_t regData) {
   // Write register address and data
   uint16_t addr = (((regAddr & 0x7F) | 0x80) << 8); // Toggle sign bit, and check that the address is 8 bits
   uint16_t lowWord = (addr | (regData & 0xFF)); // OR Register address (A) with data(D) (AADD)
-  uint16_t highWord = ((addr | 0x100) | ((regData >> 8) & 0xFF)); // OR Register address with data and increment address
+  uint16_t highWord = ((addr | 0x01) | ((regData >> 8) & 0xFF)); // OR Register address with data and increment address
 
   // Split words into chars
   uint8_t highBytehighWord = (highWord >> 8);
