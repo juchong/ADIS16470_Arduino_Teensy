@@ -28,7 +28,7 @@ Be sure to restart the Arduino IDE to refresh the library directory!
 
 You'll need to build a cable to interface the sensor with the [ADIS16470/PCB](http://www.analog.com/en/design-center/evaluation-hardware-and-software/evaluation-boards-kits/EVAL-ADIS16470.html). The image below shows a custom Teensy interface board designed for iSensor products.
 
-![ADIS16470-Teensy Interface Board](https://raw.githubusercontent.com/juchong/ADIS16470_Arduino_Teensy/master/ADIS16470/images/470_Breakout_Example.jpg)
+![ADIS16470-Teensy Interface Board](https://raw.githubusercontent.com/juchong/ADIS16470_Arduino_Teensy/master/docs/images/470_Breakout_Example.jpg)
 
 Pin assignments for the Teensy can be found in the example sketch comments.
 
@@ -36,10 +36,10 @@ Pin assignments for the Teensy can be found in the example sketch comments.
 
 Once you have the sensor connected and have opened the **ADIS16470_Teensy_BurstRead_Example.ino** example sketch, use PuTTY to connect to the Arduino using the following settings. Note that your COM port may be different:
 
-![ADIS16470 Example PuTTY Config](https://raw.githubusercontent.com/juchong/ADIS16470_Arduino_Teensy/master/ADIS16470/images/putty.PNG)
+![ADIS16470 Example PuTTY Config](https://raw.githubusercontent.com/juchong/ADIS16470_Arduino_Teensy/master/docs/images/putty.PNG)
 
 If everything is working, you should see a screen like this:
 
-![ADIS16470 Example PuTTY Output](https://raw.githubusercontent.com/juchong/ADIS16470_Arduino_Teensy/master/ADIS16470/images/470_sample_output.PNG)
+![ADIS16470 Example PuTTY Output](https://raw.githubusercontent.com/juchong/ADIS16470_Arduino_Teensy/master/docs/images/470_sample_output.PNG)
 
 Note that the demo software will only update the screen ~2 times/second, but every sample is being captured by the interrupt service routine.
