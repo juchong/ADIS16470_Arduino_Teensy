@@ -31,6 +31,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#pragma once
+
 #define ADIS16470_h
 #include "Arduino.h"
 #include <SPI.h>
@@ -109,8 +111,11 @@ public:
   // Performs hardware reset by sending pin 8 low on the DUT for n milliseconds
   int resetDUT(uint8_t ms);
 
-  // Sets SPI bit order, clock divider, and data mode
-  int configSPI();
+  // Sets SPI bit order, clock divider, and data mode and sets CS chip to LOW.
+  int select();
+
+  // Disables SPI bus and sets CS chip to HIGH.
+  int deselect();
 
   // Read single register from sensor
   int16_t regRead(uint8_t regAddr);

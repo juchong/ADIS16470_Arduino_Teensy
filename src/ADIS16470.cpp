@@ -46,8 +46,6 @@ ADIS16470::ADIS16470(int CS, int DR, int RST) {
   _RST = RST;
 // Initialize SPI
   SPI.begin();
-// Configure SPI controller
-  configSPI();
 // Set default pin states
   pinMode(_CS, OUTPUT); // Set CS pin to be an output
   pinMode(_DR, INPUT); // Set DR pin to be an input
@@ -60,8 +58,6 @@ ADIS16470::ADIS16470(int CS, int DR, int RST) {
 // Destructor
 ////////////////////////////////////////////////////////////////////////////
 ADIS16470::~ADIS16470() {
-  // Close SPI bus
-  SPI.end();
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -77,14 +73,30 @@ int ADIS16470::resetDUT(uint8_t ms) {
 }
 
 ////////////////////////////////////////////////////////////////////////////
-// Sets SPI bit order, clock divider, and data mode. This function is useful
-// when there are multiple SPI devices using different settings.
+// Selects the ADIS16470 for read/write operations.
+// Sets SPI bit order, clock divider, and data mode.
+// Also sets chip select to LOW.
+// This function is useful when there are multiple SPI devices
+// using different settings.
 // Returns 1 when complete.
 ////////////////////////////////////////////////////////////////////////////
-int ADIS16470::configSPI() {
+int ADIS16470::select() {
   SPISettings IMUSettings(1000000, MSBFIRST, SPI_MODE3);
   SPI.beginTransaction(IMUSettings);
-  return(1);
+  digitalWrite(_CS, LOW); // Set CS low to enable device
+  return (1);
+}
+
+////////////////////////////////////////////////////////////////////////////
+// Deselects the ADIS16470 for read/write operations.
+// Frees up the SPi bus for other devices.
+// Also sets chip select to HIGH.
+// Returns 1 when complete.
+////////////////////////////////////////////////////////////////////////////
+int ADIS16470::deselect() {
+  SPI.endTransaction();
+  digitalWrite(_CS, HIGH); // Set CS high to disable device
+  return (1);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -97,18 +109,18 @@ int16_t ADIS16470::regRead(uint8_t regAddr) {
 //Read registers using SPI
   
   // Write register address to be read
-  digitalWrite(_CS, LOW); // Set CS low to enable device
+  select();              // select the device
   SPI.transfer(regAddr); // Write address over SPI bus
   SPI.transfer(0x00); // Write 0x00 to the SPI bus fill the 16 bit transaction requirement
-  digitalWrite(_CS, HIGH); // Set CS high to disable device
+  deselect();            // deselect the device
 
   delayMicroseconds(_stall); // Delay to not violate read rate 
 
   // Read data from requested register
-  digitalWrite(_CS, LOW); // Set CS low to enable device
+  select();              // select the device
   uint8_t _msbData = SPI.transfer(0x00); // Send (0x00) and place upper byte into variable
   uint8_t _lsbData = SPI.transfer(0x00); // Send (0x00) and place lower byte into variable
-  digitalWrite(_CS, HIGH); // Set CS high to disable device
+  deselect();            // deselect the device
 
   delayMicroseconds(_stall); // Delay to not violate read rate 
   
@@ -139,18 +151,18 @@ int ADIS16470::regWrite(uint8_t regAddr, int16_t regData) {
   uint8_t lowBytelowWord = (lowWord & 0xFF);
 
   // Write highWord to SPI bus
-  digitalWrite(_CS, LOW); // Set CS low to enable device
+  select();              // select the device
   SPI.transfer(highBytelowWord); // Write high byte from low word to SPI bus
   SPI.transfer(lowBytelowWord); // Write low byte from low word to SPI bus
-  digitalWrite(_CS, HIGH); // Set CS high to disable device
+  deselect();            // deselect the device
 
   delayMicroseconds(_stall);; // Delay to not violate read rate 
 
   // Write lowWord to SPI bus
-  digitalWrite(_CS, LOW); // Set CS low to enable device
+  select();              // select the device
   SPI.transfer(highBytehighWord); // Write high byte from high word to SPI bus
   SPI.transfer(lowBytehighWord); // Write low byte from high word to SPI bus
-  digitalWrite(_CS, HIGH); // Set CS high to disable device
+  deselect();            // deselect the device
 
   delayMicroseconds(_stall);; // Delay to not violate read rate 
 
@@ -168,7 +180,7 @@ uint8_t *ADIS16470::byteBurst(void) {
 	static uint8_t burstdata[20];
 
 	// Trigger Burst Read
-	digitalWrite(_CS, LOW);
+  select(); // select the device
 	SPI.transfer(0x68);
 	SPI.transfer(0x00);
 
@@ -193,7 +205,7 @@ uint8_t *ADIS16470::byteBurst(void) {
 	burstdata[17] = SPI.transfer(0x00);
 	burstdata[18] = SPI.transfer(0x00); //CHECKSUM
 	burstdata[19] = SPI.transfer(0x00);
-	digitalWrite(_CS, HIGH);
+  select(); // deselect the device
 
   return burstdata;
 
@@ -210,7 +222,7 @@ uint16_t *ADIS16470::wordBurst(void) {
   static uint16_t burstwords[10];
 
   // Trigger Burst Read
-  digitalWrite(_CS, LOW);
+  select(); // select the device
   SPI.transfer(0x68);
   SPI.transfer(0x00);
 
@@ -226,7 +238,7 @@ uint16_t *ADIS16470::wordBurst(void) {
   burstwords[8] = ((SPI.transfer(0x00) << 8) | (SPI.transfer(0x00) & 0xFF)); //TIME_STMP
   burstwords[9] = ((SPI.transfer(0x00) << 8) | (SPI.transfer(0x00) & 0xFF)); //CHECKSUM
 
-  digitalWrite(_CS, HIGH);
+  deselect();  // deselect the device
 
   return burstwords;
 
