@@ -44,9 +44,9 @@ ADIS16470::ADIS16470(int CS, int DR, int RST) {
   _CS = CS;
   _DR = DR;
   _RST = RST;
-// Initialize SPI
+  // Initialize SPI
   SPI.begin();
-// Set default pin states
+  // Set default pin states
   pinMode(_CS, OUTPUT); // Set CS pin to be an output
   pinMode(_DR, INPUT); // Set DR pin to be an input
   pinMode(_RST, OUTPUT); // Set RST pin to be an output
@@ -66,7 +66,7 @@ ADIS16470::~ADIS16470() {
 ////////////////////////////////////////////////////////////////////////////
 int ADIS16470::resetDUT(uint8_t ms) {
   digitalWrite(_RST, LOW);
-  delay(100);
+  delay(ms);
   digitalWrite(_RST, HIGH);
   delay(ms);
   return(1);
@@ -177,35 +177,35 @@ int ADIS16470::regWrite(uint8_t regAddr, int16_t regData) {
 ////////////////////////////////////////////////////////////////////////////
 uint8_t *ADIS16470::byteBurst(void) {
 
-	static uint8_t burstdata[20];
+  static uint8_t burstdata[20];
 
-	// Trigger Burst Read
+  // Trigger Burst Read
   select(); // select the device
-	SPI.transfer(0x68);
-	SPI.transfer(0x00);
+  SPI.transfer(0x68);
+  SPI.transfer(0x00);
 
-	// Read Burst Data
-	burstdata[0] = SPI.transfer(0x00); //DIAG_STAT
-	burstdata[1] = SPI.transfer(0x00);
-	burstdata[2] = SPI.transfer(0x00); //XGYRO_OUT
-	burstdata[3] = SPI.transfer(0x00);
-	burstdata[4] = SPI.transfer(0x00); //YGYRO_OUT
-	burstdata[5] = SPI.transfer(0x00);
-	burstdata[6] = SPI.transfer(0x00); //ZGYRO_OUT
-	burstdata[7] = SPI.transfer(0x00);
-	burstdata[8] = SPI.transfer(0x00); //XACCEL_OUT
-	burstdata[9] = SPI.transfer(0x00);
-	burstdata[10] = SPI.transfer(0x00); //YACCEL_OUT
-	burstdata[11] = SPI.transfer(0x00);
-	burstdata[12] = SPI.transfer(0x00); //ZACCEL_OUT
-	burstdata[13] = SPI.transfer(0x00);
-	burstdata[14] = SPI.transfer(0x00); //TEMP_OUT
-	burstdata[15] = SPI.transfer(0x00);
-	burstdata[16] = SPI.transfer(0x00); //TIME_STMP
-	burstdata[17] = SPI.transfer(0x00);
-	burstdata[18] = SPI.transfer(0x00); //CHECKSUM
-	burstdata[19] = SPI.transfer(0x00);
-  select(); // deselect the device
+  // Read Burst Data
+  burstdata[0] = SPI.transfer(0x00); //DIAG_STAT
+  burstdata[1] = SPI.transfer(0x00);
+  burstdata[2] = SPI.transfer(0x00); //XGYRO_OUT
+  burstdata[3] = SPI.transfer(0x00);
+  burstdata[4] = SPI.transfer(0x00); //YGYRO_OUT
+  burstdata[5] = SPI.transfer(0x00);
+  burstdata[6] = SPI.transfer(0x00); //ZGYRO_OUT
+  burstdata[7] = SPI.transfer(0x00);
+  burstdata[8] = SPI.transfer(0x00); //XACCEL_OUT
+  burstdata[9] = SPI.transfer(0x00);
+  burstdata[10] = SPI.transfer(0x00); //YACCEL_OUT
+  burstdata[11] = SPI.transfer(0x00);
+  burstdata[12] = SPI.transfer(0x00); //ZACCEL_OUT
+  burstdata[13] = SPI.transfer(0x00);
+  burstdata[14] = SPI.transfer(0x00); //TEMP_OUT
+  burstdata[15] = SPI.transfer(0x00);
+  burstdata[16] = SPI.transfer(0x00); //TIME_STMP
+  burstdata[17] = SPI.transfer(0x00);
+  burstdata[18] = SPI.transfer(0x00); //CHECKSUM
+  burstdata[19] = SPI.transfer(0x00);
+  deselect(); // deselect the device
 
   return burstdata;
 
@@ -252,14 +252,14 @@ uint16_t *ADIS16470::wordBurst(void) {
 // return - (int16_t) signed calculated checksum
 ////////////////////////////////////////////////////////////////////////////
 int16_t ADIS16470::checksum(uint16_t * burstArray) {
-	int16_t s = 0;
-	for (int i = 0; i < 9; i++) // Checksum value is not part of the sum!!
-	{
-	    s += (burstArray[i] & 0xFF); // Count lower byte
+  int16_t s = 0;
+  for (int i = 0; i < 9; i++) // Checksum value is not part of the sum!!
+  {
+      s += (burstArray[i] & 0xFF); // Count lower byte
       s += ((burstArray[i] >> 8) & 0xFF); // Count upper byte
-	}
+  }
 
-	return s;
+  return s;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
